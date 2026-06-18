@@ -3,57 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Predicción de Math Score</title>
+    <title>Predicci&oacute;n de Math Score</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background: #f5f7fb;
-            color: #1f2937;
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f3f6fa;
+            color: #222;
         }
 
-        main {
-            max-width: 760px;
-            margin: 0 auto;
-            background: white;
-            padding: 28px;
-            border-radius: 8px;
-            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+        .contenedor {
+            max-width: 540px;
+            margin: 40px auto;
+            padding: 24px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
         }
 
         h1 {
-            margin-top: 0;
+            margin: 0 0 8px;
+            font-size: 24px;
+            text-align: center;
+            color: #1f2937;
+        }
+
+        .texto {
+            margin: 0 0 22px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
         }
 
         form {
             display: grid;
-            gap: 16px;
+            gap: 14px;
         }
 
         label {
-            font-weight: 700;
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 14px;
         }
 
-        select,
-        input {
+        input,
+        select {
             width: 100%;
-            box-sizing: border-box;
             padding: 10px;
-            margin-top: 6px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: 15px;
+            border: 1px solid #bbb;
+            border-radius: 4px;
+            font-size: 14px;
+            background: #fff;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #2563eb;
         }
 
         button {
-            width: fit-content;
-            padding: 11px 18px;
-            border: 0;
-            border-radius: 6px;
+            margin-top: 8px;
+            padding: 11px;
+            border: none;
+            border-radius: 4px;
             background: #2563eb;
             color: white;
             font-size: 15px;
-            font-weight: 700;
+            font-weight: bold;
             cursor: pointer;
         }
 
@@ -61,17 +79,48 @@
             background: #1d4ed8;
         }
 
+        button:disabled {
+            opacity: 0.7;
+            cursor: wait;
+        }
+
         #resultado {
-            margin-top: 22px;
-            font-size: 20px;
-            font-weight: 700;
+            margin-top: 18px;
+            padding: 12px;
+            border-radius: 4px;
+            background: #eef4ff;
+            border: 1px solid #c9d8ff;
+            text-align: center;
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+
+        #resultado.error {
+            background: #fff0f0;
+            border-color: #ffc2c2;
+            color: #9f1239;
+        }
+
+        @media (max-width: 600px) {
+            .contenedor {
+                margin: 20px 12px;
+                padding: 20px;
+            }
         }
     </style>
     <script>
         function predecirMathScore(event) {
             event.preventDefault();
 
-            const formData = new URLSearchParams(new FormData(event.target));
+            const form = event.target;
+            const button = form.querySelector("button");
+            const resultado = document.getElementById("resultado");
+            const formData = new URLSearchParams(new FormData(form));
+
+            button.disabled = true;
+            button.innerText = "Calculando...";
+            resultado.className = "";
+            resultado.innerText = "Procesando prediccion...";
 
             fetch("/predict", {
                 method: "POST",
@@ -82,29 +131,35 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    const resultado = document.getElementById("resultado");
-
                     if (data.error) {
+                        resultado.className = "error";
                         resultado.innerText = "Error: " + data.error;
                         return;
                     }
 
+                    resultado.className = "";
                     resultado.innerText = data.mensaje;
                 })
                 .catch(error => {
-                    document.getElementById("resultado").innerText = "Error en la solicitud.";
+                    resultado.className = "error";
+                    resultado.innerText = "Error en la solicitud.";
                     console.error("Error:", error);
+                })
+                .finally(() => {
+                    button.disabled = false;
+                    button.innerText = "Predecir";
                 });
         }
     </script>
 </head>
 <body>
-    <main>
-        <h1>Predicción de Math Score</h1>
+    <main class="contenedor">
+        <h1>Predicci&oacute;n de Math Score</h1>
+        <p class="texto">Completa el formulario para estimar la calificaci&oacute;n de matem&aacute;ticas.</p>
 
         <form onsubmit="predecirMathScore(event)">
             <div>
-                <label for="gender">Género</label>
+                <label for="gender">Genero</label>
                 <select id="gender" name="gender" required>
                     <option value="female">female</option>
                     <option value="male">male</option>
@@ -143,7 +198,7 @@
             </div>
 
             <div>
-                <label for="test_preparation_course">Curso de preparación</label>
+                <label for="test_preparation_course">Curso de preparacion</label>
                 <select id="test_preparation_course" name="test_preparation_course" required>
                     <option value="none">none</option>
                     <option value="completed">completed</option>
@@ -160,10 +215,10 @@
                 <input id="writing_score" name="writing_score" type="number" min="0" max="100" step="1" value="74" required>
             </div>
 
-            <button type="submit">Enviar</button>
+            <button type="submit">Predecir</button>
         </form>
 
-        <p id="resultado"></p>
+        <div id="resultado">Aun no hay prediccion.</div>
     </main>
 </body>
 </html>
