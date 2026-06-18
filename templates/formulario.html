@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predicción de Math Score</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background: #f5f7fb;
+            color: #1f2937;
+        }
+
+        main {
+            max-width: 760px;
+            margin: 0 auto;
+            background: white;
+            padding: 28px;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        form {
+            display: grid;
+            gap: 16px;
+        }
+
+        label {
+            font-weight: 700;
+        }
+
+        select,
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            margin-top: 6px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+
+        button {
+            width: fit-content;
+            padding: 11px 18px;
+            border: 0;
+            border-radius: 6px;
+            background: #2563eb;
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        #resultado {
+            margin-top: 22px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+    </style>
+    <script>
+        function predecirMathScore(event) {
+            event.preventDefault();
+
+            const formData = new URLSearchParams(new FormData(event.target));
+
+            fetch("/predict", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: formData.toString(),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const resultado = document.getElementById("resultado");
+
+                    if (data.error) {
+                        resultado.innerText = "Error: " + data.error;
+                        return;
+                    }
+
+                    resultado.innerText = data.mensaje;
+                })
+                .catch(error => {
+                    document.getElementById("resultado").innerText = "Error en la solicitud.";
+                    console.error("Error:", error);
+                });
+        }
+    </script>
+</head>
+<body>
+    <main>
+        <h1>Predicción de Math Score</h1>
+
+        <form onsubmit="predecirMathScore(event)">
+            <div>
+                <label for="gender">Género</label>
+                <select id="gender" name="gender" required>
+                    <option value="female">female</option>
+                    <option value="male">male</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="race_ethnicity">Race/Ethnicity</label>
+                <select id="race_ethnicity" name="race_ethnicity" required>
+                    <option value="group A">group A</option>
+                    <option value="group B">group B</option>
+                    <option value="group C">group C</option>
+                    <option value="group D">group D</option>
+                    <option value="group E">group E</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="parental_level_of_education">Nivel educativo de los padres</label>
+                <select id="parental_level_of_education" name="parental_level_of_education" required>
+                    <option value="some high school">some high school</option>
+                    <option value="high school">high school</option>
+                    <option value="some college">some college</option>
+                    <option value="associate's degree">associate's degree</option>
+                    <option value="bachelor's degree">bachelor's degree</option>
+                    <option value="master's degree">master's degree</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="lunch">Lunch</label>
+                <select id="lunch" name="lunch" required>
+                    <option value="standard">standard</option>
+                    <option value="free/reduced">free/reduced</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="test_preparation_course">Curso de preparación</label>
+                <select id="test_preparation_course" name="test_preparation_course" required>
+                    <option value="none">none</option>
+                    <option value="completed">completed</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="reading_score">Reading score</label>
+                <input id="reading_score" name="reading_score" type="number" min="0" max="100" step="1" value="72" required>
+            </div>
+
+            <div>
+                <label for="writing_score">Writing score</label>
+                <input id="writing_score" name="writing_score" type="number" min="0" max="100" step="1" value="74" required>
+            </div>
+
+            <button type="submit">Enviar</button>
+        </form>
+
+        <p id="resultado"></p>
+    </main>
+</body>
+</html>
